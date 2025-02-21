@@ -1,3 +1,33 @@
 1.Download Docker Desktop
 https://docs.docker.com/desktop/setup/install/windows-install/
 
+2. Cài đặt N8N
+
+2.1 start ngrok lấy url
+#(url bản free sẽ thay đổi khi start lại), lưu ý không tắt ngrok đang chạy, nếu chạy lại cần đăng ký lại url ngrok khi chạy docker n8n, đăng ký Authorized redirect URIs
+trong console google về url mới nếu sử dụng google authen)
+
+docker run --rm -it ngrok/ngrok:latest http ipv4:5678 --authtoken=token (Token đăng ký trên  https://dashboard.ngrok.com/get-started/your-authtoken)
+
+2.2 start n8n
+#WEBHOOK_URL: domain https khi đăng ký ngrok
+#N8N_HOST: ipv4 của máy cá nhân
+#p 10.10.117.155:5678:5678 --restart=no  -v E:\dockerdata\n8n:/home/node/.n8n n8nio/n8n:latest
+#set --env=N8N_SECURE_COOKIE=false  để chạy trên ip v4
+docker run -d --name baduy-n8n --hostname=f38843272c36 --user=node --mac-address=02:42:ac:11:00:02 --env=N8N_SECURE_COOKIE=false --env=N8N_HOST=10.10.117.151 --env=N8N_PORT=5678 --env=WEBHOOK_URL=https://491-25.ngrok-free.app --network=bridge --workdir=/home/node -p 10.10.117.155:5678:5678 --restart=no  -v E:\dockerdata\n8n:/home/node/.n8n n8nio/n8n:latest
+Truy cập trình duyệt với ip của N8N_HOST:5678
+
+
+#code split output llm:
+let note=$input.first().json.output;
+note = note.replaceAll("\n","").replaceAll("```","").replace("json","");
+note=JSON.parse(note);
+// Lấy ngày giờ hiện tại theo local time
+const now = new Date();
+note["ngaygio"] = now.toLocaleString("vi-VN", { timeZone: "Asia/Ho_Chi_Minh" }); // Định dạng giờ Việt Nam (GMT+7)
+return note;
+
+#prompt giá vàng:
+Bạn là chuyên gia tài chính lĩnh vực phân tích giá cả thị trường vàng. Hãy đưa ra những thống kê phân tích theo các tiêu chí từ dữ liệu và dự đoán từ dữ liệu:{{ $json.data }} và theo yêu cầu đầu vào
+
+
