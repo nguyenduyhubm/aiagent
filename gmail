@@ -1,0 +1,4 @@
+#Địa chỉ đăng ký sử dụng API và Google Oauth
+https://console.cloud.google.com/
+Tạo mới project. Đăng ký các API: gmail,gemini,sheet,doc
+Lưu client ID và SecKey 
