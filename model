@@ -1,0 +1,12 @@
+
+Tên mô hình	Nhà phát triển	Số lượng tham số	Năm ra mắt	Đặc điểm nổi bật
+GPT-3	OpenAI	175 tỷ	2020	Mô hình đa năng, hỗ trợ nhiều nhiệm vụ như dịch thuật, viết văn bản, trả lời câu hỏi.
+GPT-4	OpenAI	~1.000 tỷ (ước đoán)	2023	Phiên bản nâng cấp của GPT-3, cải thiện độ chính xác và khả năng hiểu ngữ cảnh.
+BERT	Google	110 triệu - 340 triệu	2018	Tập trung vào hiểu ngữ cảnh hai chiều, phù hợp cho các nhiệm vụ phân loại và tìm kiếm.
+T5 (Text-to-Text)	Google	220 triệu - 11 tỷ	2019	Xử lý mọi nhiệm vụ dưới dạng văn bản đầu vào và đầu ra.
+PaLM	Google	540 tỷ	2022	Mô hình lớn, tập trung vào hiệu suất cao và khả năng đa nhiệm.
+LaMDA	Google	137 tỷ	2021	Được thiết kế cho đối thoại tự nhiên, tập trung vào khả năng trò chuyện.
+Megatron-Turing NLG	NVIDIA & Microsoft	530 tỷ	2021	Một trong những mô hình lớn nhất, tập trung vào hiệu suất tính toán cao.
+LLaMA (Large Language Model Meta AI)	Meta (Facebook)	7 tỷ - 65 tỷ	2023	Mô hình nhẹ hơn, tối ưu hóa cho nghiên cứu và ứng dụng thực tế.
+BLOOM	BigScience	176 tỷ	2022	Mô hình đa ngôn ngữ, được huấn luyện trên dữ liệu từ 46 ngôn ngữ.
+Claude	Anthropic	~52 tỷ	2023	Tập trung vào đạo đức AI và an toàn trong đối thoại.
