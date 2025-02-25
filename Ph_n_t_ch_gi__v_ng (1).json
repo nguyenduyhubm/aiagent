@@ -1,0 +1,293 @@
+{
+  "name": "Phân tích giá vàng",
+  "nodes": [
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $('Telegram Trigger').item.json.message.text }}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "=Bạn là chuyên gia tài chính lĩnh vực phân tích giá cả thị trường vàng. Hãy đưa ra những thống kê phân tích theo các tiêu chí từ dữ liệu và dự đoán từ dữ liệu:{{ $json.data }} và yêu cầu đầu vào"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        -180,
+        -20
+      ],
+      "id": "fe86aa49-eb39-4aa0-b3e9-da13424b2e22",
+      "name": "AI Agent",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-1.5-flash",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -180,
+        180
+      ],
+      "id": "cbd3f0b2-7483-4d40-b4f1-0d1ec837a13a",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "7bLqPg1TUrexJsa7",
+          "name": "Google Gemini(PaLM) Api account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -860,
+        -240
+      ],
+      "id": "b2b308c3-53e9-424f-98a7-45cb8d921a55",
+      "name": "Telegram Trigger",
+      "webhookId": "73c4cd03-53db-4956-a5f3-03c00d34e974",
+      "credentials": {
+        "telegramApi": {
+          "id": "QPpW8vzWCVCvdbLJ",
+          "name": "Telegram account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "http://giavang.doji.vn/api/giavang/?api_key=258fbd2a72ce8481089d88c678e9fe4f",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "text"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -160,
+        -400
+      ],
+      "id": "32aeff93-e2e1-4fac-b339-f0e23aa4a10e",
+      "name": "Vàng DOJI"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "0334f984-279f-4cc9-808b-a7b49a8d98d0",
+              "leftValue": "={{ $json.message.text }}",
+              "rightValue": "doji",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -540,
+        -340
+      ],
+      "id": "ffcfb504-e785-4ab2-ba3e-49ab5718648a",
+      "name": "nhận diện doji"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "9baa9388-8ed9-4d20-8765-51b688c67564",
+              "leftValue": "={{ $json.message.text }}",
+              "rightValue": "9999",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -700,
+        -20
+      ],
+      "id": "621e2639-5fcb-4fdb-9970-26e683adb0bb",
+      "name": "Nhận diện 9999"
+    },
+    {
+      "parameters": {
+        "url": "https://exchange.goonus.io/exchange/api/v1/golds?age=vang-9999",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "text"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -380,
+        -20
+      ],
+      "id": "77e04b20-5f9b-42ad-b2f0-5ed43df42b8d",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "text": "={{ $('Telegram Trigger').item.json.message.from.username }}:{{ $('Telegram Trigger').item.json.message.text }}\nPhán đoán của AI:\n{{ $json.output }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        180,
+        -20
+      ],
+      "id": "4b8d8814-00ba-46a1-807e-4b3fbad2736c",
+      "name": "Telegram",
+      "webhookId": "147339ff-48ee-41c2-b46c-1c7271eb96e3",
+      "credentials": {
+        "telegramApi": {
+          "id": "QPpW8vzWCVCvdbLJ",
+          "name": "Telegram account 2"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "nhận diện doji",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Nhận diện 9999",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Telegram",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "nhận diện doji": {
+      "main": [
+        [
+          {
+            "node": "Vàng DOJI",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Nhận diện 9999": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Vàng DOJI": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "b8aff3b8-a9ab-4bfe-8264-c743b7f27af7",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "1e1b3c28d7f0da01ec7459c0f0b575c4b65d674d902ae0e2e9041cbbe1a8c98a"
+  },
+  "id": "8BvovD0aS0GqCzml",
+  "tags": []
+}
