@@ -1,0 +1,192 @@
+{
+  "name": "phantichchiso_ttvt",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -260,
+        -20
+      ],
+      "id": "853d0438-23dc-406f-8f62-b4e5b954e4e3",
+      "name": "When clicking ‘Test workflow’"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1FmtBkAeZI2Cs5tJpZWYgzeoZzdvKwYJXGAFCumZYd1k",
+          "mode": "list",
+          "cachedResultName": "n8n-ttvt",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1FmtBkAeZI2Cs5tJpZWYgzeoZzdvKwYJXGAFCumZYd1k/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Trang tính1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1FmtBkAeZI2Cs5tJpZWYgzeoZzdvKwYJXGAFCumZYd1k/edit#gid=0"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        -40,
+        -20
+      ],
+      "id": "45248507-185c-4166-921d-3be0c116904f",
+      "name": "Google Sheets",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "dE3YQtdQKFBmjz8M",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Dựa vào danh sách dữ liệu:{{ $json.fullList }}.Với 2 chỉ số C1.1 và C2.2 làm trọng tâm. Hãy viết bài đánh giá và so sánh TTVT nào có chỉ số thấp nhất và cao nhất(theo 2 chỉ số trên). Tổng hợp đánh giá chỉ số cải thiện từ số liệu ngày hôm qua và hôm nay.\nDữ liệu trả về theo mã HTML.",
+        "options": {
+          "systemMessage": "Bạn là chuyên gia về phân tích lịch sử chỉ số. Hãy đưa ra câu trả lời dánh giá theo hướng tổng hợp."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        440,
+        0
+      ],
+      "id": "f553fe3a-2843-448c-bbff-761ffe5e6e57",
+      "name": "AI Agent",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-1.5-flash",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        400,
+        200
+      ],
+      "id": "6f6ddf89-7aee-4fd9-a4e2-1d081cdbf300",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "7bLqPg1TUrexJsa7",
+          "name": "Google Gemini(PaLM) Api account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Lấy dữ liệu từ input\nconst sheetData = $input.all();\n\n// Lấy tiêu đề từ hàng đầu tiên (nếu Google Sheets node trả về dạng chuẩn)\nconst headers = Object.keys(sheetData[0].json);\n\n// Tạo danh sách dữ liệu với tiêu đề làm key\nconst formattedData = sheetData.map(item => {\n  const row = item.json;\n  return headers.reduce((obj, header) => {\n    obj[header] = row[header] || \"\"; // Gán giá trị, nếu không có thì để trống\n    return obj;\n  }, {});\n});\n\n// Trả về dữ liệu dạng JSON\n//return [{ json: { fullList: formattedData } }];\nreturn { fullList: JSON.stringify(formattedData) };\n\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        140,
+        -160
+      ],
+      "id": "f9e933b4-c227-4e5f-add5-9ed0761e92b1",
+      "name": "Code"
+    },
+    {
+      "parameters": {
+        "sendTo": "duynv@vnpt.vn",
+        "subject": "phân tích chỉ số",
+        "message": "={{ $json.output }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        800,
+        0
+      ],
+      "id": "b375fa88-07bb-4ea0-bd4b-37b26c0bebd1",
+      "name": "Gmail",
+      "webhookId": "1d42362e-32b3-47ed-af5c-a37c435d2a1d",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "rLFPAi5hUN2FvVhA",
+          "name": "Gmail account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Test workflow’": {
+      "main": [
+        [
+          {
+            "node": "Google Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Sheets": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Gmail",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "9a3803da-48fe-493d-8bcd-69483150b6a0",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "1e1b3c28d7f0da01ec7459c0f0b575c4b65d674d902ae0e2e9041cbbe1a8c98a"
+  },
+  "id": "e0yhVGK90fYKUVr5",
+  "tags": []
+}
