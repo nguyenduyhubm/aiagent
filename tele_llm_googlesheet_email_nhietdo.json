@@ -1,0 +1,347 @@
+{
+  "name": "tele-llm-googlesheet-email-nhietdo",
+  "nodes": [
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=\nHãy dựa vào đoạn văn bản sau để phân tích và trả lời ngắn gọn. Nếu người dùng gửi nội dung lên dạng báo cáo nhiệt độ thì phân tích chuỗi lấy ra giá trị nhiệt độ kèm phân tích dự đoán nguy cơ. Nếu giá trị đó dưới 20 là bình thường, từ 20 đến 30 là hơi cao rồi, cần bật điều hòa. nếu quá 40 độ thì phản hồi về nguy cơ. nếu trên 40 độ gửi cảnh báo về duynv@vnpt.vn. Luôn trả về output dạng json như sau:\n{\n\"cauhoi\":\"câu hỏi\",\n\"nhietdo\":\"giá trị nhiệt độ\",\n\"email\":\"email nhận cảnh báo\",\n\"binhluan\":\"bình luận\"\n}\ntrong đó câu hỏi là dữ liệu đầu vào là đoạn văn bản {{ $json.message.text }}, giá trị nhiệt độ là giá trị dạng số mà bạn nhận diện ra, bình luận là câu phân tích/bình luận của bạn về giá trị đó, email là danh sách email bạn nhận diện ra nếu giá trị trong ngưỡng khai báo.",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "=Bạn là chuyên gia về giám sát môi trường phòng máy chủ. Luôn trả về câu trả lời dạng json item sau:{\n\"cauhoi\":\"câu hỏi\",\n\"nhietdo\":\"giá trị nhiệt độ\",\n\"email\":\"email nhận cảnh báo\",\n\"binhluan\":\"bình luận\"\n}"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        20,
+        -40
+      ],
+      "id": "c941b7e0-e763-4654-a064-7cdd24895fe5",
+      "name": "AI Agent",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-1.5-flash",
+        "options": {
+          "temperature": 0.4
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        20,
+        160
+      ],
+      "id": "317cce53-f96a-4f14-8346-a0c9d0f59164",
+      "name": "Google Gemini Chat Model",
+      "notesInFlow": true,
+      "credentials": {
+        "googlePalmApi": {
+          "id": "f7uargZmOge3Sohl",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      },
+      "notes": "gemini API"
+    },
+    {
+      "parameters": {
+        "sendTo": "= {{ $json.email }}",
+        "subject": "Cảnh báo nhiệt độ cao",
+        "message": "={{ $json.cauhoi }}\nKhuyến nghị:{{ $json.binhluan }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        940,
+        -260
+      ],
+      "id": "31aec5b6-d8cb-46ea-aa86-8457b7ff2032",
+      "name": "Gmail",
+      "webhookId": "a11c660a-6a1d-4f32-9b87-ef51c7d3325a",
+      "alwaysOutputData": true,
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "rLFPAi5hUN2FvVhA",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Loop over input items and add a new field called 'myNewField' to the JSON of each one\n// $input.all();\n//language java script, mode: run once for each item$input.first().json.output\nlet note=$input.first().json.output;\nnote = note.replaceAll(\"\\n\",\"\").replaceAll(\"```\",\"\").replace(\"json\",\"\");\nnote=JSON.parse(note);\n// Lấy ngày giờ hiện tại theo local time\nconst now = new Date();\nnote[\"ngaygio\"] = now.toLocaleString(\"vi-VN\", { timeZone: \"Asia/Ho_Chi_Minh\" }); // Định dạng giờ Việt Nam (GMT+7)\n\nreturn note;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        320,
+        -240
+      ],
+      "id": "5f55f4f1-cf1a-4951-9a5c-0fb8baaf57bf",
+      "name": "Code",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "e578aa92-75e8-4827-a275-13b748c3bb4e",
+              "leftValue": "={{ $json.email }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        540,
+        -360
+      ],
+      "id": "4c410693-6d7e-467f-b097-4214466ffccb",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1zTDfBIFLAiub8rGZqXXA3e2bwXv-0Lom0bIrPL0LIlk",
+          "mode": "list",
+          "cachedResultName": "n8n test",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1zTDfBIFLAiub8rGZqXXA3e2bwXv-0Lom0bIrPL0LIlk/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Trang tính1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1zTDfBIFLAiub8rGZqXXA3e2bwXv-0Lom0bIrPL0LIlk/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "chat": "={{ $json.cauhoi }}",
+            "nhietdo": "={{ $json.nhietdo }}",
+            "email": "={{ $json.email }}",
+            "binhluan": "={{ $json.binhluan }}",
+            "ngaygio": "={{ $json.ngaygio }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "chat",
+              "displayName": "chat",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "ngaygio",
+              "displayName": "ngaygio",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "nhietdo",
+              "displayName": "nhietdo",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "email",
+              "displayName": "email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "binhluan",
+              "displayName": "binhluan",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        840,
+        -420
+      ],
+      "id": "36941aa4-9998-4ab4-bc94-a665fe5273ee",
+      "name": "Google Sheets",
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "dE3YQtdQKFBmjz8M",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -320,
+        0
+      ],
+      "id": "2d157982-a344-420b-841e-129ca4705d34",
+      "name": "Telegram Trigger - BaDuyN8N",
+      "webhookId": "6a0743f0-c259-4c88-8d17-87298f1013bd",
+      "credentials": {
+        "telegramApi": {
+          "id": "C5loRkp8MyCslPJR",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger - BaDuyN8N').item.json.message.chat.id }}",
+        "text": "=Câu hỏi của {{ $('Telegram Trigger - BaDuyN8N').item.json.message.from.first_name }} là:{{ $('Telegram Trigger - BaDuyN8N').item.json.message.text }}\n------\nCâu trả lời AI:{{ $json.binhluan }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        700,
+        60
+      ],
+      "id": "7d67b56f-d1bf-4b43-84dd-5435cff9a606",
+      "name": "Telegram-- BaDuyN8N",
+      "webhookId": "0890e172-bc0a-4ea9-a11d-453bcbb08fd8",
+      "credentials": {
+        "telegramApi": {
+          "id": "C5loRkp8MyCslPJR",
+          "name": "Telegram account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gmail": {
+      "main": [
+        []
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "Telegram-- BaDuyN8N",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Gmail",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Google Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Telegram Trigger - BaDuyN8N": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "5ea79bd7-ed88-4928-831b-c08ad2da22c0",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "1e1b3c28d7f0da01ec7459c0f0b575c4b65d674d902ae0e2e9041cbbe1a8c98a"
+  },
+  "id": "yRAr1QYaqtucwUme",
+  "tags": []
+}
