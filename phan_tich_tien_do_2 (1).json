@@ -1,0 +1,251 @@
+{
+  "name": "phan tich tien do 2",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "e74c1c0f-1edc-4c54-9828-158390edd95e",
+      "name": "When clicking ‘Test workflow’"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1AiXA8Lb-bKj4kz_zxZA2w_qZ-drT6omJs8jNernv9RA",
+          "mode": "list",
+          "cachedResultName": "tiendo",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1AiXA8Lb-bKj4kz_zxZA2w_qZ-drT6omJs8jNernv9RA/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Trang tính1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1AiXA8Lb-bKj4kz_zxZA2w_qZ-drT6omJs8jNernv9RA/edit#gid=0"
+        },
+        "options": {
+          "outputFormatting": {
+            "values": {
+              "general": "UNFORMATTED_VALUE",
+              "date": "FORMATTED_STRING"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        220,
+        0
+      ],
+      "id": "a417c17a-f25b-449e-834d-2df4cd0e2f4d",
+      "name": "Google Sheets",
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "ElXY0URc3UnY7XFp",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.message }}. Xắp xếp lại bảng tiến độ theo độ hoàn thành từ thấp đến cao. Thêm cột đếm số ngày quá hạn từ cột thời hạn xử lý.Dữ liệu trả về là 1 mảng theo cấu trúc item: với tiêu đề như dữ liệu đầu vào và thêm  trường songayquahan, thêm trường suy luận với nội dung tự động từ AI dựa trên các yếu tố lý do và tên công việc để nhắc nhở người thực hiện . ",
+        "options": {
+          "systemMessage": "Bạn là lãnh đạo quản lý tiến độ công việc. Luôn trả về dạng json.Không cần bổ sung phân tích chi tiết để phá vỡ cấu trúc json. Bỏ     [JsonProperty(\"item\")] chỉ trả về list"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        600,
+        -20
+      ],
+      "id": "0abd9a28-a71a-497b-8638-b065858fb650",
+      "name": "AI Agent",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-1.5-flash",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        620,
+        200
+      ],
+      "id": "8c1f8043-4627-42e5-9eae-f85a662a661c",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "WBfB6I3Aua57qLOp",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const data = $input.all(); // Lấy dữ liệu từ Google Sheets\nconst prompt = \"Dựa đầu vào: \" + JSON.stringify(data);\nreturn [{ json: { message: prompt } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        400,
+        0
+      ],
+      "id": "56405bd7-b792-4a23-bb3f-9019d7c8fb01",
+      "name": "Code",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.email }}",
+        "subject": "=thống kê tiến độ cv {{ $json.subject }}",
+        "message": "={{ $json.body }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        300,
+        200
+      ],
+      "id": "6de99008-37d7-49f2-9a95-b8bd48b8ca4c",
+      "name": "Gmail",
+      "webhookId": "fa1d42bc-2671-4dfe-9569-d62860bc6697",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "91eSKqjspPAUxJNU",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "let note=$input.first().json.output;\nnote = note.replaceAll(\"\\n\",\"\").replaceAll(\"```\",\"\").replace(\"json\",\"\");\nnote=JSON.parse(note);\n// Lấy ngày giờ hiện tại theo local time\n//const now = new Date();\n//note[\"ngaygiokiemtra\"] = now.toLocaleString(\"vi-VN\", { timeZone: \"Asia/Ho_Chi_Minh\" }); \n// Định dạng giờ Việt Nam (GMT+7)\n\nreturn  note;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1040,
+        -20
+      ],
+      "id": "3eb3cb3a-6af8-483d-987f-8c482b79d037",
+      "name": "Nhận diện danh sách quá hạn"
+    },
+    {
+      "parameters": {
+        "jsCode": "\nlet output = [];\n\n// Duyệt từng item trong mảng JSON để chuẩn bị gửi email\n$input.all().forEach(item => {\n    output.push({\n        json: {\n            email:item.json.emailldpt ,  // Email của lãnh đạo phụ trách\n              subject: `Đang có công việc quá hạn: ${item.json[\"songayquahan\"]} ngày. Nội dung: ${item.json[\"Tên công việc\"]}`,\n            body: `Bạn đang có công việc đang ở trang thái: ${item.json[\"Kết quả\"]} <br>\n<b>Số văn bản:${item.json[\"Số văn bản\"]}</b>\\n<br>\nTên công việc:${item.json[\"Tên công việc\"]}\\n<br>\nTrạng thái thẩm định:${item.json[\"Trạng thái thẩm định\"]} \\n<br>\nLý do:${item.json[\"Lý do\"]} \\n<br>\nChú ý:${item.json[\"suyluan\"]} \\n<br>\n\nTrân trọng!`\n        }\n    });\n});\n\nreturn output;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1080,
+        240
+      ],
+      "id": "5e5e47a4-e5cb-488c-be90-658bdfbedd86",
+      "name": "Tạo tiêu đề và nội dung email"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Test workflow’": {
+      "main": [
+        [
+          {
+            "node": "Google Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Sheets": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Nhận diện danh sách quá hạn",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Nhận diện danh sách quá hạn": {
+      "main": [
+        [
+          {
+            "node": "Tạo tiêu đề và nội dung email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tạo tiêu đề và nội dung email": {
+      "main": [
+        [
+          {
+            "node": "Gmail",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "45a5e7b1-74a2-494f-a8e8-fe49324f8d26",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "03eba309339bdaac49fbe081ab96b4d03954894e14a402279dfa8d19da217f29"
+  },
+  "id": "W6JDJaNzEmarQAZ5",
+  "tags": []
+}
