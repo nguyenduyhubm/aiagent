@@ -1,0 +1,24 @@
+const inputText = $input.first().json.text; // Lấy dữ liệu đầu vào từ node trước đó
+
+// Tìm vị trí của JSON trong chuỗi
+const jsonStartIndex = inputText.indexOf('{'); 
+const jsonEndIndex = inputText.lastIndexOf('}');
+
+// Nếu tìm thấy JSON, cắt chuỗi
+if (jsonStartIndex !== -1 && jsonEndIndex !== -1) {
+    const textBefore = inputText.substring(0, jsonStartIndex).trim();  // Văn bản trước JSON
+    const jsonString = inputText.substring(jsonStartIndex, jsonEndIndex + 1); // JSON tách ra
+    const textAfter = inputText.substring(jsonEndIndex + 1).trim(); // Văn bản sau JSON
+
+    // Chuyển JSON từ chuỗi thành Object (nếu hợp lệ)
+    let jsonData;
+    try {
+        jsonData = JSON.parse(jsonString);
+    } catch (error) {
+        jsonData = { error: "JSON không hợp lệ" };
+    }
+
+    return [{ json: { textBefore, jsonData, textAfter } }];
+} else {
+    return [{ json: { error: "Không tìm thấy JSON trong văn bản" } }];
+}
