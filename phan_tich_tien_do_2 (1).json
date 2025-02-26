@@ -93,45 +93,6 @@
     },
     {
       "parameters": {
-        "jsCode": "const data = $input.all(); // Lấy dữ liệu từ Google Sheets\nconst prompt = \"Dựa đầu vào: \" + JSON.stringify(data);\nreturn [{ json: { message: prompt } }];"
-      },
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        400,
-        0
-      ],
-      "id": "56405bd7-b792-4a23-bb3f-9019d7c8fb01",
-      "name": "Code",
-      "alwaysOutputData": true
-    },
-    {
-      "parameters": {
-        "sendTo": "={{ $json.email }}",
-        "subject": "=thống kê tiến độ cv {{ $json.subject }}",
-        "message": "={{ $json.body }}",
-        "options": {
-          "appendAttribution": false
-        }
-      },
-      "type": "n8n-nodes-base.gmail",
-      "typeVersion": 2.1,
-      "position": [
-        300,
-        200
-      ],
-      "id": "6de99008-37d7-49f2-9a95-b8bd48b8ca4c",
-      "name": "Gmail",
-      "webhookId": "fa1d42bc-2671-4dfe-9569-d62860bc6697",
-      "credentials": {
-        "gmailOAuth2": {
-          "id": "91eSKqjspPAUxJNU",
-          "name": "Gmail account"
-        }
-      }
-    },
-    {
-      "parameters": {
         "jsCode": "let note=$input.first().json.output;\nnote = note.replaceAll(\"\\n\",\"\").replaceAll(\"```\",\"\").replace(\"json\",\"\");\nnote=JSON.parse(note);\n// Lấy ngày giờ hiện tại theo local time\n//const now = new Date();\n//note[\"ngaygiokiemtra\"] = now.toLocaleString(\"vi-VN\", { timeZone: \"Asia/Ho_Chi_Minh\" }); \n// Định dạng giờ Việt Nam (GMT+7)\n\nreturn  note;"
       },
       "type": "n8n-nodes-base.code",
@@ -155,6 +116,45 @@
       ],
       "id": "5e5e47a4-e5cb-488c-be90-658bdfbedd86",
       "name": "Tạo tiêu đề và nội dung email"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.email }}",
+        "subject": "=thống kê tiến độ cv {{ $json.subject }}",
+        "message": "={{ $json.body }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        300,
+        200
+      ],
+      "id": "6de99008-37d7-49f2-9a95-b8bd48b8ca4c",
+      "name": "SendMail ",
+      "webhookId": "fa1d42bc-2671-4dfe-9569-d62860bc6697",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "91eSKqjspPAUxJNU",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const data = $input.all(); // Lấy dữ liệu từ Google Sheets\nconst prompt = \"Dựa đầu vào: \" + JSON.stringify(data);\nreturn [{ json: { message: prompt } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        400,
+        0
+      ],
+      "id": "56405bd7-b792-4a23-bb3f-9019d7c8fb01",
+      "name": "Nhận diện danh sách",
+      "alwaysOutputData": true
     }
   ],
   "pinData": {},
@@ -174,7 +174,7 @@
       "main": [
         [
           {
-            "node": "Code",
+            "node": "Nhận diện danh sách",
             "type": "main",
             "index": 0
           }
@@ -187,17 +187,6 @@
           {
             "node": "AI Agent",
             "type": "ai_languageModel",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Code": {
-      "main": [
-        [
-          {
-            "node": "AI Agent",
-            "type": "main",
             "index": 0
           }
         ]
@@ -229,7 +218,18 @@
       "main": [
         [
           {
-            "node": "Gmail",
+            "node": "SendMail ",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Nhận diện danh sách": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
             "type": "main",
             "index": 0
           }
@@ -241,7 +241,7 @@
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "45a5e7b1-74a2-494f-a8e8-fe49324f8d26",
+  "versionId": "9298afbd-b26d-4489-b996-8b62ba801572",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "03eba309339bdaac49fbe081ab96b4d03954894e14a402279dfa8d19da217f29"
