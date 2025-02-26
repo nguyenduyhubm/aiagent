@@ -22,3 +22,43 @@ if (jsonStartIndex !== -1 && jsonEndIndex !== -1) {
 } else {
     return [{ json: { error: "Không tìm thấy JSON trong văn bản" } }];
 }
+
+
+//gán công thức tính ngày quá hạn
+const data = $input.all(); // Lấy dữ liệu đầu vào
+
+// Lấy ngày hiện tại
+const currentDate = new Date();
+
+const processedData = data.map(item => {
+    let row = item.json;
+    
+    // Kiểm tra nếu có trường "Thời hạn xử lý"
+    if (row["Thời hạn xử lý"]) {
+        try {
+            // Tách ngày, bỏ phần giờ nếu có
+            let deadlineString = row["Thời hạn xử lý"].split(" ")[0]; // Lấy phần ngày (bỏ giờ)
+            let deadlineParts = deadlineString.split("/"); // tách dd/MM/yyyy
+
+            // Chuyển thành Date object (yyyy, mm (0-based), dd)
+            let deadlineDate = new Date(deadlineParts[2], deadlineParts[1] - 1, deadlineParts[0]);
+
+            // Tính số ngày quá hạn
+            let diffTime = currentDate - deadlineDate;
+            let overdueDays = Math.max(Math.floor(diffTime / (1000 * 60 * 60 * 24)), 0); // Đảm bảo không âm
+
+            // Gán giá trị `songayquahan` vào dữ liệu
+            row["songayquahan"] = overdueDays;
+        } catch (error) {
+            row["songayquahan"] = "Lỗi xử lý ngày"; // Debug nếu có lỗi
+        }
+    } else {
+        row["songayquahan"] = 0; // Nếu không có "Thời hạn xử lý", mặc định là 0
+    }
+
+    return { json: row };
+});
+
+return processedData;
+
+
