@@ -1,0 +1,33 @@
+from playwright.sync_api import sync_playwright
+#hoặc dùng selelium
+
+def login_and_scrape():
+    with sync_playwright() as p:
+        # Khởi chạy trình duyệt
+        browser = p.chromium.launch(headless=False)  # headless=False để thấy trình duyệt hoạt động
+        page = browser.new_page()
+        
+        # Truy cập trang đăng nhập
+        page.goto("https://vnexpress.net/")
+
+        # Nhập username và password (thay XPath tương ứng)
+        #page.locator('//html/body/div[1]/div/div[1]/div/div[3]/div[2]/div[1]/div/input').fill("duynv")
+        #page.locator('//html/body/div[1]/div/div[1]/div/div[3]/div[2]/div[2]/div/input').fill("a")
+
+        # Click vào nút đăng nhập
+        page.locator('//html/body/section[2]/nav/ul/li[6]/a').click()
+        #page.locator('//html/body/section[1]/nav/ul/li[6]/ul/li[1]/a').click()
+
+        # Đợi điều hướng sau khi đăng nhập thành công
+        #page.wait_for_load_state("networkidle")
+
+        # Lấy giá trị từ một phần tử theo XPath sau khi đăng nhập
+        titleText = page.locator('//html/body/section[6]/div/div/div[1]/article[1]/div/a').get_attribute('title');
+        #console.log(titleText);
+        print("Bài viết mới:", titleText)
+
+        # Đóng trình duyệt
+        browser.close()
+
+# Chạy hàm
+login_and_scrape()
