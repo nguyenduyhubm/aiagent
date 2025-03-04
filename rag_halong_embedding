@@ -34,14 +34,14 @@ sorted_scores = [similarities[idx].item() for idx in sorted_indices]
 for doc, score in zip(sorted_docs, sorted_scores):
     print(f"Document: {doc} - Cosine Similarity: {score:.4f}")
 
-##Kết quả:
+##query = "Bóng đá có lợi ích gì cho sức khỏe?":
 ##Document: Bóng đá giúp cải thiện sức khỏe tim mạch và tăng cường sức bền. - Cosine Similarity: 0.7318
 ##Document: Chơi bóng đá giúp giảm căng thẳng và cải thiện tâm lý. - Cosine Similarity: 0.6623
 ##Document: Bóng đá không chỉ là môn thể thao mà còn là cách để giải trí. - Cosine Similarity: 0.6102
 ##Document: Bóng đá có thể giúp bạn kết nối với nhiều người hơn. - Cosine Similarity: 0.4988
 ##Document: Bóng đá là môn thể thao phổ biến nhất thế giới. - Cosine Similarity: 0.4828
 ##
-##================== RESTART: D:/dotnet/2024/AI/rag_embedding.py =================
+##================== Tuyến quang 10G được phép xử lý trong bao lâu? =================
 ##Document: Quy định xử lý tuyến quang 10G là 10 giờ. - Cosine Similarity: 0.8367
 ##Document: Quy định xử lý tuyến quang 1G là 1 giờ. - Cosine Similarity: 0.6227
 ##Document: Bóng đá có thể giúp bạn kết nối với nhiều người hơn. - Cosine Similarity: 0.0438
@@ -50,3 +50,12 @@ for doc, score in zip(sorted_docs, sorted_scores):
 ##Document: Bóng đá không chỉ là môn thể thao mà còn là cách để giải trí. - Cosine Similarity: -0.0158
 ##Document: Bóng đá là môn thể thao phổ biến nhất thế giới. - Cosine Similarity: -0.0429
 
+##==================query="Ngày 3/3/2025 trung tâm đhtt có sự kiện gì?" =================
+##Document: Ngày 3/3/2025 tại đơn vị trung tâm đhtt tổ chức sự kiện chia tay 48 cán bộ, cnv chuyển sang công tác tại TTVT. - Cosine Similarity: 0.5436
+##Document: Quy định xử lý tuyến quang 1G là 1 giờ. - Cosine Similarity: 0.0511
+##Document: Bóng đá không chỉ là môn thể thao mà còn là cách để giải trí. - Cosine Similarity: 0.0383
+##Document: Quy định xử lý tuyến quang 10G là 10 giờ. - Cosine Similarity: 0.0362
+##Document: Chơi bóng đá giúp giảm căng thẳng và cải thiện tâm lý. - Cosine Similarity: 0.0252
+##Document: Bóng đá có thể giúp bạn kết nối với nhiều người hơn. - Cosine Similarity: 0.0067
+##Document: Bóng đá giúp cải thiện sức khỏe tim mạch và tăng cường sức bền. - Cosine Similarity: -0.0192
+##Document: Bóng đá là môn thể thao phổ biến nhất thế giới. - Cosine Similarity: -0.0627
