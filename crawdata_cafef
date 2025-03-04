@@ -1,0 +1,71 @@
+from playwright.sync_api import sync_playwright
+import time
+from datetime import datetime
+
+def login_and_scrape(mack):
+    with sync_playwright() as p:
+        # Khởi chạy trình duyệt
+        browser = p.chromium.launch(headless=False)  # headless=False để thấy trình duyệt hoạt động
+        page = browser.new_page()
+        
+        # Truy cập trang cafef
+        page.goto("https://cafef.vn/")
+
+
+        # Chờ phần tử input nhập mã chứng khoán xuất hiện
+        xpath_input = '//html/body/div[1]/div[2]/div[2]/div/div[1]/div/div[2]/div[1]/div[2]/div[1]/input[1]'
+        page.wait_for_selector(xpath_input, timeout=10000)  # Chờ tối đa 10 giây
+        
+        # nhập mã ck
+        page.locator(xpath_input).fill(mack)
+        time.sleep(2) 
+        # Click vào nút tìm kiếm
+        page.locator('//html/body/div[1]/div[2]/div[2]/div/div[1]/div/div[2]/div[1]/div[2]/div[1]/a').click()
+        time.sleep(3) 
+        # Đợi điều hướng sau khi tìm kiếm
+        page.wait_for_load_state("networkidle")
+
+
+          # Lấy tên công ty
+        tencongty = page.locator('//*[@id="namebox"]/h1').text_content().strip()
+
+
+        print("Tên công ty:", tencongty)
+         #Khối lượng
+        element_price__vol = page.locator('//*[@id="price__vol"]')
+        price_price__vol = element_price__vol.text_content().strip()
+        print("Khối lượng:", price_price__vol)
+        
+        #giá tham chgieeus
+        element_price__ref = page.locator('//*[@id="price__ref"]')
+        price_price__ref = element_price__ref.text_content().strip()
+        print("Giá tham chiếu:", price_price__ref)
+
+        #giá trần
+        element_price__ceiling = page.locator('//*[@id="price__ceiling"]')
+        price_price__ceiling = element_price__ceiling.text_content().strip()
+        print("Giá trần:", price_price__ceiling)
+        
+
+
+        # Đóng trình duyệt
+        browser.close()
+        now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        print(f"[{now}] Thời điểm đồng bộ")
+        print("----------------------")
+        # Trả về dữ liệu
+        return {
+            "stock_code": mack,
+            "company_name": tencongty,
+            "volume": price_price__vol,
+            "reference_price": price_price__ref,
+            "ceiling_price": price_price__ceiling,
+            "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        }
+
+# Chạy hàm
+#login_and_scrape()
+# Chạy hàm liên tục mỗi 3 giây
+while True:
+    login_and_scrape('SSI')
+    time.sleep(3)  # Dừng 3 giây rồi chạy lại
